@@ -1,0 +1,220 @@
+/*
+ * Landing page — register: Instrument.
+ *
+ * Scoped to this route. Nothing here changes the dashboard or any other page.
+ *
+ * The page sits inside the app's token layer: it uses the same radius, the same
+ * Card surfaces and the same type scale as the rest of Sentinel. What it adds
+ * on top is the instrument character — uppercase micro-labels, tabular
+ * numerals, and a ruled tick scale — so the page reads as a readout rather
+ * than a marketing banner while still being visibly the same product.
+ *
+ * Deliberately NOT redefined here, because the app already owns them:
+ *   - radius. --radius is 0.75rem and every surface uses it.
+ *   - shadows. Cards carry the shared shadow-xs + ring-1 treatment.
+ *   - the typeface. --font-sans maps to the app's JetBrains Mono; adding a
+ *     second face on one route would make this page argue with the dashboard,
+ *     so the copy is kept terse instead.
+ */
+
+/* ---------------------------------------------------------------- labels --- */
+
+.pl-label {
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.pl-value {
+  font-size: 1.75rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+
+/* A readout with nothing behind it. Never a placeholder zero. */
+.pl-value[data-empty="true"] {
+  color: var(--muted-foreground);
+}
+
+/* -------------------------------------------------------------- tick row --- */
+
+/* ----------------------------------------------------------- status dot --- */
+
+/*
+ * The one accent-plus-semantics moment. --color-success / --color-error /
+ * --color-degraded already exist as tokens; they are used here strictly to
+ * mean up / down / degraded and for nothing decorative.
+ */
+.pl-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  flex: none;
+  background: var(--color-degraded);
+}
+
+.pl-dot[data-state="up"] {
+  background: var(--color-success);
+}
+
+.pl-dot[data-state="down"] {
+  background: var(--color-error);
+}
+
+/* ---------------------------------------------------------------- reveal --- */
+
+/*
+ * Gated on `.js` (set before first paint by an inline script in the root
+ * layout). Without JavaScript nothing is ever marked visible, so the hidden
+ * state must not be applied at all — otherwise the section below the hero
+ * would stay clipped forever, which is worse than no animation.
+ *
+ * The safety net below covers the other failure: JS runs but the observer
+ * never fires.
+ */
+.js .pl-reveal {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 350ms var(--pl-ease-out);
+}
+
+.js .pl-reveal[data-visible="true"] {
+  clip-path: inset(0 0 0 0);
+}
+
+/*
+ * The staggered children are the list items, and `.pl-stagger` is on the <ol>
+ * that Reveal wraps. Keying off `.pl-reveal[data-visible]` rather than
+ * `.pl-stagger[data-visible]` is deliberate: the visible flag lands on the
+ * Reveal wrapper, and a wrapper-scoped selector would only ever match the
+ * single <ol>, collapsing the stagger back into one move.
+ *
+ * 40ms apart, inside the 30-80ms band for a stagger. Purely decorative.
+ */
+.pl-stagger > * {
+  transform: translateY(6px);
+}
+
+/* Declared after the resting transform above so the two never fight on
+   specificity. */
+.js .pl-reveal[data-visible="true"] .pl-stagger > * {
+  animation: pl-rise 350ms var(--pl-ease-out) both;
+}
+
+.pl-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.pl-stagger > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+.pl-stagger > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+.pl-stagger > *:nth-child(4) {
+  animation-delay: 120ms;
+}
+
+/*
+ * Transform only, no opacity, so an unrevealed item still sits 6px low and
+ * reads rather than vanishing. GPU-accelerated and off the main thread, which
+ * matters here: the page is decoding images and painting at the same time.
+ */
+@keyframes pl-rise {
+  from {
+    transform: translateY(6px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ----------------------------------------------------------- interactions --- */
+
+/*
+ * Press feedback. The shared Button carries `transition-all`, which animates
+ * every property on every state change — this narrows it to the two that
+ * actually move on press. 150ms, in the 100-160ms band for press feedback:
+ * fast enough to read as a response to the finger, not as an animation.
+ */
+.pl-press {
+  transition-property: color, background-color, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.pl-press:active {
+  transform: scale(0.97);
+  transition-duration: 100ms;
+}
+
+/*
+ * Hover is gated: touch devices fire hover on tap, which strands the state
+ * after the finger lifts.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .pl-rule-link:hover {
+    color: var(--foreground);
+  }
+
+  .pl-press:hover {
+    transform: scale(1.02);
+  }
+}
+
+.pl-rule-link {
+  color: var(--muted-foreground);
+  /* Color only — a hover that also moved the link would make the header feel
+     like it was made of loose parts. */
+  transition: color 150ms ease;
+  text-underline-offset: 4px;
+}
+
+/* ------------------------------------------------------------ reduced motion --- */
+
+/*
+ * Reduced motion means fewer and gentler, not zero: colour transitions that aid
+ * comprehension stay, movement goes. The elapsed-since readout keeps counting —
+ * it is information, not decoration.
+ */
+@media (prefers-reduced-motion: reduce) {
+  /* Movement is off, so the clip must not be used to hide anything either —
+     the content still has to be there. */
+  .js .pl-reveal {
+    clip-path: none;
+    transition-duration: 0ms;
+  }
+
+  .pl-stagger > * {
+    animation: none;
+    transform: none;
+  }
+
+  .pl-press:active {
+    transform: none;
+  }
+
+  /* Colour transitions that aid comprehension stay. */
+  .pl-rule-link,
+  .pl-press {
+    transition-duration: 0ms;
+  }
+}
+
+/*
+ * Print and forced-colors never animate. Without this the sections below the
+ * fold print as blank boxes, because nothing observes them on paper.
+ */
+@media print {
+  .js .pl-reveal {
+    clip-path: none;
+    transition: none;
+  }
+
+  .pl-stagger > * {
+    animation: none;
+    transform: none;
+  }
+}

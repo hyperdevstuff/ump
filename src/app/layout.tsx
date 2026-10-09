@@ -24,7 +24,20 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${jetbrainsMono.variable}`}
     >
-      <head />
+      <head>
+        {/*
+          Marks the document as script-capable before first paint, so CSS can
+          apply entrance animations only when something is there to drive them.
+          Without JS the landing page must render fully visible rather than
+          stuck behind a clip-path that will never be released.
+        */}
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: runs once, before paint, to set a class on <html>
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
       <body className="antialiased">
         <Providers>{children}</Providers>
       </body>

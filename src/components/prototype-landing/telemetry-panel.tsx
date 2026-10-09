@@ -1,4 +1,5 @@
 import { ElapsedSince } from "@/components/prototype-landing/elapsed-since";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SentinelTelemetry } from "@/lib/prototype-landing-telemetry";
 
 function formatClock(date: Date) {
@@ -21,12 +22,14 @@ function Readout({
   empty?: boolean;
 }) {
   return (
-    <div className="pl-plate border border-border bg-card px-3 py-2.5">
+    <div className="rounded-lg border border-border bg-background px-3 py-2.5">
       <div className="pl-label">{label}</div>
       <div className="pl-value mt-1.5" data-empty={empty ? "true" : "false"}>
         {value}
         {unit && !empty && (
-          <span className="ml-1 text-xs text-muted-foreground">{unit}</span>
+          <span className="ml-1 text-xs font-normal text-muted-foreground">
+            {unit}
+          </span>
         )}
       </div>
     </div>
@@ -40,6 +43,9 @@ function Readout({
  * incident tables — counts and timings only, never a customer's URL or monitor
  * name. If the database cannot be reached the panel says so plainly instead of
  * rendering plausible-looking filler.
+ *
+ * Built on the shared Card so it carries the same radius, ring and shadow as
+ * every other surface in the app.
  */
 export function TelemetryPanel({
   telemetry,
@@ -47,93 +53,95 @@ export function TelemetryPanel({
   telemetry: SentinelTelemetry | null;
 }) {
   return (
-    <div className="pl-plate border border-border bg-card">
+    <Card size="sm">
       {/* Header strip */}
-      <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2">
-        <div className="flex items-center gap-2">
+      <CardHeader className="flex-row items-center justify-between gap-3 border-b border-border">
+        <CardTitle className="flex items-center gap-2">
           <span
             className="pl-dot"
             data-state={telemetry ? "up" : "down"}
             aria-hidden="true"
           />
           <span className="pl-label">Sentinel telemetry</span>
-        </div>
+        </CardTitle>
         <span className="pl-label">24h</span>
-      </div>
+      </CardHeader>
 
-      {telemetry ? (
-        <>
-          <div className="grid grid-cols-2 gap-px bg-border">
-            <Readout
-              label="Checks"
-              value={telemetry.checks24h.toLocaleString("en-GB")}
-              empty={telemetry.checks24h === 0}
-            />
-            <Readout
-              label="Uptime"
-              value={
-                telemetry.uptime24h === null
-                  ? "—"
-                  : telemetry.uptime24h.toFixed(2)
-              }
-              unit="%"
-              empty={telemetry.uptime24h === null}
-            />
-            <Readout
-              label="Response"
-              value={
-                telemetry.avgResponseMs === null
-                  ? "—"
-                  : telemetry.avgResponseMs.toLocaleString("en-GB")
-              }
-              unit="ms"
-              empty={telemetry.avgResponseMs === null}
-            />
-            <Readout
-              label="Monitors"
-              value={telemetry.monitors.toLocaleString("en-GB")}
-            />
-            <Readout
-              label="Incidents"
-              value={telemetry.incidents7d.toLocaleString("en-GB")}
-            />
-            <Readout
-              label="Since check"
-              value={
-                telemetry.lastCheckedAt
-                  ? formatClock(telemetry.lastCheckedAt)
-                  : "—"
-              }
-              empty={!telemetry.lastCheckedAt}
-            />
-          </div>
+      <CardContent className="px-0">
+        {telemetry ? (
+          <>
+            <div className="grid grid-cols-2 gap-3 p-4">
+              <Readout
+                label="Checks"
+                value={telemetry.checks24h.toLocaleString("en-GB")}
+                empty={telemetry.checks24h === 0}
+              />
+              <Readout
+                label="Uptime"
+                value={
+                  telemetry.uptime24h === null
+                    ? "—"
+                    : telemetry.uptime24h.toFixed(2)
+                }
+                unit="%"
+                empty={telemetry.uptime24h === null}
+              />
+              <Readout
+                label="Response"
+                value={
+                  telemetry.avgResponseMs === null
+                    ? "—"
+                    : telemetry.avgResponseMs.toLocaleString("en-GB")
+                }
+                unit="ms"
+                empty={telemetry.avgResponseMs === null}
+              />
+              <Readout
+                label="Monitors"
+                value={telemetry.monitors.toLocaleString("en-GB")}
+              />
+              <Readout
+                label="Incidents"
+                value={telemetry.incidents7d.toLocaleString("en-GB")}
+              />
+              <Readout
+                label="Since check"
+                value={
+                  telemetry.lastCheckedAt
+                    ? formatClock(telemetry.lastCheckedAt)
+                    : "—"
+                }
+                empty={!telemetry.lastCheckedAt}
+              />
+            </div>
 
-          {/* Live foot: the one thing on the page that moves on its own. */}
-          <div className="flex items-center justify-between gap-3 border-t border-border px-3 py-2">
-            <span className="pl-label">Last check</span>
-            {telemetry.lastCheckedAt ? (
-              <span className="flex items-baseline gap-1.5 text-xs text-muted-foreground">
-                <ElapsedSince iso={telemetry.lastCheckedAt.toISOString()} />
-                <span className="text-foreground">ago</span>
-              </span>
-            ) : (
-              <span className="text-xs text-muted-foreground">
-                no checks yet
-              </span>
-            )}
+            {/* Live foot: the one thing on the page that moves on its own. */}
+            <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-2.5">
+              <span className="pl-label">Last check</span>
+              {telemetry.lastCheckedAt ? (
+                <span className="flex items-baseline gap-1.5 text-xs text-muted-foreground">
+                  <ElapsedSince iso={telemetry.lastCheckedAt.toISOString()} />
+                  <span className="text-foreground">ago</span>
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  no checks yet
+                </span>
+              )}
+            </div>
+          </>
+        ) : (
+          /* Obviously static, never a zero dressed up as a measurement. */
+          <div className="px-4 py-5">
+            <p className="pl-label">No telemetry</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This panel reads live from the database. Point{" "}
+              <code className="text-foreground">DATABASE_URL</code> at a running
+              Postgres with recorded health checks and the readouts appear here.
+            </p>
           </div>
-        </>
-      ) : (
-        /* Obviously static, never a zero dressed up as a measurement. */
-        <div className="px-3 py-4">
-          <p className="pl-label">No telemetry</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This panel reads live from the database. Point{" "}
-            <code className="text-foreground">DATABASE_URL</code> at a running
-            Postgres with recorded health checks and the readouts appear here.
-          </p>
-        </div>
-      )}
-    </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
