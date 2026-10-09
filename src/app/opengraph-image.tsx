@@ -6,13 +6,16 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
- * Share card for /prototype-landing.
+ * Share card for the landing page.
  *
  * Rendered in the Instrument register: a dark plate, one amber rule, the
- * headline set as the primary visual. It uses ImageResponse's built-in font
- * rather than JetBrains Mono — `next/font/google` downloads at build time and
- * hands back a hashed CSS variable, not a font buffer, so the project mono is
- * not available to Satori here.
+ * headline set as the primary visual. Colours match the app's dark theme
+ * tokens (--background, --primary) so the card reads as part of the product.
+ *
+ * It uses ImageResponse's built-in font rather than JetBrains Mono —
+ * `next/font/google` downloads at build time and hands back a hashed CSS
+ * variable, not a font buffer, so the project mono is not available to Satori
+ * here.
  */
 export default function OpengraphImage() {
   return new ImageResponse(

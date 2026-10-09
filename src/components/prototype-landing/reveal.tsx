@@ -40,7 +40,23 @@ export function Reveal({
     );
 
     io.observe(el);
-    return () => io.disconnect();
+
+    /*
+     * Safety net. The clip-path above hides this subtree until the observer
+     * fires, so any path that never fires — a headless screenshot, a print
+     * stylesheet, an embedded webview that suppresses IntersectionObserver —
+     * leaves the section permanently invisible. Reveal unconditionally after a
+     * beat. The animation is decorative; the content is not.
+     */
+    const failsafe = window.setTimeout(() => {
+      el.dataset.visible = "true";
+      io.disconnect();
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(failsafe);
+      io.disconnect();
+    };
   }, []);
 
   return (

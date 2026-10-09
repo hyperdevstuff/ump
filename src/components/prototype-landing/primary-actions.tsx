@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth-client";
 
 /**
@@ -20,6 +21,13 @@ import { useSession } from "@/lib/auth-client";
  * resolves keeps the CTA in the markup, hydrates identically (the first client
  * render also has no session yet), and holds the same box dimensions so there
  * is no layout shift when it flips.
+ *
+ * `nativeButton={false}` is required on each Button. The shared Button wraps
+ * Base UI's `ButtonPrimitive`, which assumes a real <button> and emits
+ * `type`/`tabindex` accordingly. Rendering an anchor through it without this
+ * produces `<a type="button" tabindex="0">` — button attributes on a link,
+ * no Enter/Space activation, and a dev-mode warning. With it, the anchor
+ * keeps real link semantics.
  */
 export function PrimaryActions({
   size = "default",
@@ -28,35 +36,41 @@ export function PrimaryActions({
 }) {
   const { data: session } = useSession();
   const signedIn = Boolean(session?.user);
-  const box = size === "lg" ? "h-11 px-6 text-[0.9375rem]" : "h-10 px-5";
 
   if (signedIn) {
     return (
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Link
-          href="/dashboard"
-          className={`pl-cta inline-flex items-center justify-center border border-transparent bg-primary font-medium text-primary-foreground hover:bg-primary/80 active:scale-[0.97] ${box}`}
+        <Button
+          size={size}
+          className="w-full sm:w-auto"
+          nativeButton={false}
+          render={<Link href="/dashboard" />}
         >
           Open dashboard
-        </Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <Link
-        href="/sign-up"
-        className={`pl-cta inline-flex items-center justify-center border border-transparent bg-primary font-medium text-primary-foreground hover:bg-primary/80 active:scale-[0.97] ${box}`}
+      <Button
+        size={size}
+        className="w-full sm:w-auto"
+        nativeButton={false}
+        render={<Link href="/sign-up" />}
       >
         Start monitoring
-      </Link>
-      <Link
-        href="/sign-in"
-        className={`pl-cta inline-flex items-center justify-center border border-border bg-background font-medium text-foreground hover:bg-muted ${box}`}
+      </Button>
+      <Button
+        size={size}
+        variant="outline"
+        className="w-full sm:w-auto"
+        nativeButton={false}
+        render={<Link href="/sign-in" />}
       >
         Sign in
-      </Link>
+      </Button>
     </div>
   );
 }
