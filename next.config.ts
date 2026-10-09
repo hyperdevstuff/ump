@@ -8,6 +8,17 @@ import type { NextConfig } from "next";
  */
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    // Reclaims unreachable compilation work from memory and the disk cache.
+    // Worth having here: this repo sat dormant for months, so the cache still
+    // holds artifacts for routes and layouts that no longer exist.
+    turbopackGc: true,
+    // Defers compiling client-side `import()` targets until the browser asks
+    // for them, so a dev session never pays for a dependency it never opens.
+    turbopackLazyDynamicImports: true,
+    // Nudge when a release with a known CVE affects the installed version.
+    agentUpgrade: "security",
+  },
   async redirects() {
     return [
       {
