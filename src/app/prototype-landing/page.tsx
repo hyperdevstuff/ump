@@ -1,0 +1,357 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
+import { PrimaryActions } from "@/components/prototype-landing/primary-actions";
+import { Reveal } from "@/components/prototype-landing/reveal";
+import { TelemetryPanel } from "@/components/prototype-landing/telemetry-panel";
+import { getSentinelTelemetry } from "@/lib/prototype-landing-telemetry";
+import "./prototype-landing.css";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ??
+      process.env.APP_URL ??
+      "http://localhost:3000",
+  ),
+  title: "Find outages before your users do",
+  description:
+    "Sentinel checks your endpoints over HTTP, TCP and ping, opens an incident the moment a check fails, and alerts Slack, Discord, webhooks or email.",
+  openGraph: {
+    title: "Find outages before your users do — Sentinel",
+    description:
+      "Uptime monitoring with incidents, multi-channel alerts and a public status page per monitor.",
+    type: "website",
+    images: [{ url: "/prototype-landing/opengraph-image" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Find outages before your users do — Sentinel",
+    description:
+      "Uptime monitoring with incidents, multi-channel alerts and a public status page per monitor.",
+  },
+};
+
+export const dynamic = "force-dynamic";
+
+const SPECS = [
+  ["Protocol", "HTTP, HTTPS, TCP, PING"],
+  ["Interval", "Any, from 5 minutes"],
+  ["Request", "GET, POST, HEAD"],
+  ["Headers", "Arbitrary, per monitor"],
+  ["Body", "JSON or form, POST only"],
+  ["Pass on", "Any status code you list"],
+  ["Timeout", "Per monitor, in ms"],
+  ["Visibility", "Public or private"],
+] as const;
+
+const FEATURES = [
+  {
+    n: "01",
+    title: "The check is yours to define",
+    body: "One interval, method, timeout and pass condition per monitor, so a marketing page and a database are not measured by the same rule.",
+    wide: true,
+  },
+  {
+    n: "02",
+    title: "Alerts land where you already work",
+    body: "Email, Slack, Discord or webhook, behind a failure threshold so one blip does not wake the whole team.",
+    wide: false,
+  },
+  {
+    n: "03",
+    title: "Incidents keep their root cause",
+    body: "Downtime opens an incident, not a log line. Detected, investigating, resolved, with a timeline and postmortem notes attached.",
+    wide: false,
+  },
+  {
+    n: "04",
+    title: "A status page your users can read",
+    body: "Make a monitor public and support gets uptime history and recent checks instead of another reply-all thread.",
+    wide: false,
+  },
+] as const;
+
+const STEPS = [
+  {
+    n: "01",
+    title: "Add a monitor",
+    body: "A URL, a host and port, or a host to ping. Set the interval and what counts as a pass.",
+  },
+  {
+    n: "02",
+    title: "Sentinel checks it on schedule",
+    body: "Every check is stored with its status, status code and response time.",
+  },
+  {
+    n: "03",
+    title: "You hear about it first",
+    body: "A failure past your threshold opens an incident and fires your channels.",
+  },
+] as const;
+
+const FOOTER_LINKS = [
+  { href: "/sign-up", label: "Create account" },
+  { href: "/sign-in", label: "Sign in" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/status", label: "Public status" },
+] as const;
+
+export default async function PrototypeLandingPage() {
+  const telemetry = await getSentinelTelemetry();
+
+  return (
+    <div className="pl-root flex min-h-screen flex-col bg-background text-foreground">
+      {/* ------------------------------------------------------------ head --- */}
+      <header className="border-b border-border">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm font-medium tracking-tight"
+          >
+            <BrandLogo size={22} />
+            <span>Sentinel</span>
+          </Link>
+          <Link
+            href="/prototype-landing"
+            className="pl-rule-link text-xs"
+            aria-current="page"
+          >
+            Prototype
+          </Link>
+        </div>
+      </header>
+
+      <main className="flex-1">
+        {/* ----------------------------------------------------------- hero --- */}
+        <section className="border-b border-border">
+          <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-7">
+              {/* The 24h window the panel below actually reports on. */}
+              <div className="pl-ticks" aria-hidden="true">
+                <span className="pl-tick">-24h</span>
+                <span className="pl-tick" data-optional="true">
+                  -18h
+                </span>
+                <span className="pl-tick" data-optional="true">
+                  -12h
+                </span>
+                <span className="pl-tick" data-optional="true">
+                  -6h
+                </span>
+                <span className="pl-tick">now</span>
+              </div>
+
+              <h1 className="mt-8 text-[clamp(2.25rem,7vw,3.75rem)] leading-[1.05] font-medium tracking-tighter">
+                Find outages before your users do
+              </h1>
+
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Checks over HTTP, TCP and ping on an interval you set. Failures
+                become incidents, alert Slack, Discord, webhooks or email, and
+                show on a status page your users can read.
+              </p>
+
+              <div className="mt-8">
+                <PrimaryActions />
+              </div>
+            </div>
+
+            {/* The one live thing on the page. */}
+            <div className="lg:col-span-5 lg:pt-10">
+              <Reveal>
+                <TelemetryPanel telemetry={telemetry} />
+              </Reveal>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                {telemetry
+                  ? "Counts and timings from every monitor on this instance. No customer URLs or names are shown."
+                  : "Counts and timings from every monitor on this instance, once a database is connected."}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------- features --- */}
+        <section className="border-b border-border">
+          <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+            <Reveal>
+              <h2 className="max-w-2xl text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight font-medium tracking-tight">
+                Everything between a failed check and a user complaining.
+              </h2>
+            </Reveal>
+
+            <div className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-12">
+              {/* Wide: the spec list needs the room. */}
+              <div className="bg-background p-5 sm:col-span-2 lg:col-span-7 lg:p-7">
+                <div className="flex items-baseline gap-3">
+                  <span className="pl-label">{FEATURES[0].n}</span>
+                  <h3 className="text-lg font-medium tracking-tight">
+                    {FEATURES[0].title}
+                  </h3>
+                </div>
+                <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+                  {FEATURES[0].body}
+                </p>
+                <dl className="mt-6 divide-y divide-border border-t border-border">
+                  {SPECS.map(([term, value]) => (
+                    <div
+                      key={term}
+                      className="pl-spec flex items-baseline justify-between gap-4 py-2"
+                    >
+                      <dt className="pl-label">{term}</dt>
+                      <dd className="pl-spec-value text-xs text-muted-foreground tabular-nums sm:text-sm">
+                        {value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              {/* Narrow column: two stacked, then one. Deliberately not 3-up. */}
+              <div className="grid gap-px bg-border sm:col-span-2 lg:col-span-5">
+                {FEATURES.slice(1, 3).map((feature) => (
+                  <div key={feature.n} className="bg-background p-5 lg:p-7">
+                    <div className="flex items-baseline gap-3">
+                      <span className="pl-label">{feature.n}</span>
+                      <h3 className="text-lg font-medium tracking-tight">
+                        {feature.title}
+                      </h3>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {feature.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-background p-5 sm:col-span-2 lg:col-span-12 lg:p-7">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
+                  <div className="lg:max-w-md">
+                    <div className="flex items-baseline gap-3">
+                      <span className="pl-label">{FEATURES[3].n}</span>
+                      <h3 className="text-lg font-medium tracking-tight">
+                        {FEATURES[3].title}
+                      </h3>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {FEATURES[3].body}
+                    </p>
+                  </div>
+                  {/* An illustrative miniature of /status/[monitorId] — not telemetry. */}
+                  <figure className="pl-plate w-full max-w-sm border border-border bg-card">
+                    <figcaption className="border-b border-border px-3 py-1.5 text-[0.625rem] tracking-[0.12em] text-muted-foreground uppercase">
+                      Public page, as your users see it
+                    </figcaption>
+                    <div className="flex items-center justify-between gap-3 px-3 py-2">
+                      <span className="text-xs">api.acme.dev</span>
+                      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="pl-dot" data-state="up" />
+                        Operational
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2 px-3 py-2.5">
+                      <span className="pl-label">Uptime</span>
+                      <span className="text-sm tabular-nums">99.98%</span>
+                    </div>
+                    <div className="flex items-baseline gap-2 border-t border-border px-3 py-2.5">
+                      <span className="pl-label">Response</span>
+                      <span className="text-sm tabular-nums">128ms</span>
+                    </div>
+                  </figure>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --------------------------------------------------- how it works --- */}
+        <section className="border-b border-border">
+          <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+            <Reveal>
+              <h2 className="max-w-2xl text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight font-medium tracking-tight">
+                From signup to first alert.
+              </h2>
+            </Reveal>
+
+            <Reveal className="pl-stagger">
+              <ol className="mt-10 grid gap-px border border-border bg-border sm:grid-cols-3">
+                {STEPS.map((step) => (
+                  <li key={step.n} className="bg-background p-5 lg:p-7">
+                    <span className="pl-label">{step.n}</span>
+                    <h3 className="mt-3 text-base font-medium tracking-tight">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {step.body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------ cta --- */}
+        <section className="border-b border-border">
+          <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-32">
+            <Reveal>
+              <h2 className="max-w-3xl text-[clamp(1.75rem,4.5vw,3rem)] leading-[1.1] font-medium tracking-tight">
+                Know it is down before a user tells you.
+              </h2>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
+                Add your first monitor in about a minute. No card, no sales
+                call.
+              </p>
+              <div className="mt-8">
+                <PrimaryActions />
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      </main>
+
+      {/* ---------------------------------------------------------- footer --- */}
+      <footer className="mt-auto">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+          <div className="max-w-xs">
+            <div className="flex items-center gap-2 text-sm font-medium tracking-tight">
+              <BrandLogo size={20} />
+              <span>Sentinel</span>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              Uptime monitoring for websites, APIs and services.
+            </p>
+          </div>
+
+          <nav aria-label="Footer" className="flex flex-col gap-2">
+            {FOOTER_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="pl-rule-link text-xs"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex flex-col gap-2">
+            <Link href="/status" className="pl-rule-link text-xs">
+              Platform status
+            </Link>
+            <a
+              href="https://buymeacoffee.com/hyperdevstuff"
+              className="pl-rule-link text-xs"
+              rel="noreferrer noopener"
+              target="_blank"
+            >
+              Support the project
+            </a>
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Sentinel
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
