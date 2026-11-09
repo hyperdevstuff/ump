@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { ConnectorsDiagram } from "@/components/prototype-landing/connectors-diagram";
 import { LandingNav } from "@/components/prototype-landing/landing-nav";
 import { PrimaryActions } from "@/components/prototype-landing/primary-actions";
 import { Reveal } from "@/components/prototype-landing/reveal";
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
       process.env.APP_URL ??
       "http://localhost:3000",
   ),
-  title: "Find outages before your users do",
+  title: "Sentinel — Uptime monitoring",
   description:
     "Sentinel checks your endpoints over HTTP, TCP and ping, opens an incident the moment a check fails, and alerts Slack, Discord, webhooks or email.",
   openGraph: {
@@ -53,48 +54,94 @@ const SPECS = [
   ["Visibility", "Public or private"],
 ] as const;
 
+const BAND = [
+  { value: "5 min", label: "Smallest interval" },
+  { value: "3", label: "Protocols: HTTP, TCP, ping" },
+  { value: "4", label: "Alert channels" },
+  { value: "1", label: "Status page per public monitor" },
+] as const;
+
 const FEATURES = [
   {
     n: "01",
-    title: "The check is yours to define",
-    body: "One interval, method, timeout and pass condition per monitor, so a marketing page and a database are not measured by the same rule.",
+    title: "Monitor anything, exactly how you want",
+    body: "HTTP, TCP or ping — with the interval, method, timeout and pass condition you set. A landing page and a database should never be judged by the same rule.",
     wide: true,
   },
   {
     n: "02",
-    title: "Alerts land where you already work",
-    body: "Email, Slack, Discord or webhook, behind a failure threshold so one blip does not wake the whole team.",
+    title: "Alerts that reach the right place",
+    body: "Email, Slack, Discord or webhook, fired only once your failure threshold is crossed — so a single blip never pages the whole team.",
     wide: false,
   },
   {
     n: "03",
-    title: "Incidents keep their root cause",
-    body: "Downtime opens an incident, not a log line. Detected, investigating, resolved, with a timeline and postmortem notes attached.",
+    title: "Incidents that keep the full story",
+    body: "Downtime opens an incident, not a log line. Detected, investigating, resolved — with a timeline and postmortem notes attached.",
     wide: false,
   },
   {
     n: "04",
-    title: "A status page your users can read",
-    body: "Make a monitor public and support gets uptime history and recent checks instead of another reply-all thread.",
+    title: "A status page your users trust",
+    body: "Publish any monitor and give your users live uptime and recent checks, instead of another reply-all thread.",
     wide: false,
+  },
+] as const;
+
+const CHANNELS = [
+  {
+    n: "Email",
+    body: "One mail per incident, sent when the failure threshold is crossed — not on the first blip.",
+  },
+  {
+    n: "Slack",
+    body: "Posted to the channel you pick, with the monitor, the failure and the time it started.",
+  },
+  {
+    n: "Discord",
+    body: "The same message, in the server your on-call already lives in.",
+  },
+  {
+    n: "Webhook",
+    body: "A JSON POST to your endpoint, so anything can subscribe: PagerDuty, n8n, your own runbook.",
   },
 ] as const;
 
 const STEPS = [
   {
-    n: "01",
     title: "Add a monitor",
     body: "A URL, a host and port, or a host to ping. Set the interval and what counts as a pass.",
   },
   {
-    n: "02",
     title: "Sentinel checks it on schedule",
     body: "Every check is stored with its status, status code and response time.",
   },
   {
-    n: "03",
     title: "You hear about it first",
     body: "A failure past your threshold opens an incident and fires your channels.",
+  },
+];
+
+const FAQ = [
+  {
+    q: "What can it check?",
+    a: "HTTP and HTTPS endpoints with GET, POST or HEAD, arbitrary headers and a JSON or form body. Raw TCP ports. Hosts over ICMP ping. Each monitor picks its protocol, interval and what counts as a pass.",
+  },
+  {
+    q: "What counts as down?",
+    a: "You decide. Pass on any status code you list, time out at a threshold you set per monitor, and stay quiet until failures cross the threshold you configured — so a single dropped request does not page anyone.",
+  },
+  {
+    q: "How often does it check?",
+    a: "Any interval from 5 minutes up, set per monitor. Every check is stored with its status, status code and response time, so history is there when you need it.",
+  },
+  {
+    q: "Can my users see any of this?",
+    a: "Make a monitor public and it gets its own status page with uptime history and recent checks. No account needed to read it, and no customer URLs are exposed anywhere else.",
+  },
+  {
+    q: "Do I need a card to start?",
+    a: "No. Create an account, add your first monitor, and the first check runs on your interval in about a minute. No card, no sales call.",
   },
 ];
 
@@ -115,34 +162,51 @@ export default async function LandingPage() {
       <main className="flex-1">
         {/* ----------------------------------------------------------- hero --- */}
         <section className="border-b border-border">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:gap-12">
-            <div className="lg:col-span-7">
-              <h1 className="text-[clamp(2.25rem,7vw,3.75rem)] leading-[1.05] font-medium tracking-tighter">
-                Find outages before your users do
-              </h1>
+          <div className="mx-auto w-full max-w-6xl px-4 pt-14 sm:px-6 sm:pt-20">
+            {/* The copy takes the narrow column and the instrument the wide
+                one — the text reads in its measure instead of running to the
+                right edge, and the card gets the room its readouts ask for.
+                The copy is centred against the card so it sits on the
+                instrument's mid line rather than riding its top edge. */}
+            <div className="grid w-full items-center gap-10 lg:grid-cols-12 lg:gap-12">
+              <div className="lg:col-span-5">
+                <h1 className="pl-h1">Find outages before your users do</h1>
 
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Checks over HTTP, TCP and ping on an interval you set. Failures
-                become incidents, alert Slack, Discord, webhooks or email, and
-                show on a status page your users can read.
-              </p>
+                <p className="pl-copy pl-lede mt-5 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  Checks over HTTP, TCP and ping on an interval you set.
+                  Failures become incidents, alert Slack, Discord, webhooks or
+                  email, and show on a status page your users can read.
+                </p>
 
-              <div className="mt-8">
-                <PrimaryActions size="lg" />
+                <div className="mt-8">
+                  <PrimaryActions size="lg" />
+                </div>
+              </div>
+
+              {/* The one live thing on the page. */}
+              <div className="lg:col-span-7">
+                <Reveal>
+                  <TelemetryPanel telemetry={telemetry} />
+                </Reveal>
+                <p className="pl-copy mt-3 text-xs leading-relaxed text-muted-foreground">
+                  {telemetry
+                    ? "Counts and timings from every monitor on this instance. No customer URLs or names are shown."
+                    : "Counts and timings from every monitor on this instance, once a database is connected."}
+                </p>
               </div>
             </div>
 
-            {/* The one live thing on the page. */}
-            <div className="lg:col-span-5 lg:pt-10">
-              <Reveal>
-                <TelemetryPanel telemetry={telemetry} />
-              </Reveal>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                {telemetry
-                  ? "Counts and timings from every monitor on this instance. No customer URLs or names are shown."
-                  : "Counts and timings from every monitor on this instance, once a database is connected."}
-              </p>
-            </div>
+            {/* The band reads as one ruled instrument strip, part of the hero. */}
+            <Reveal className="mt-14 sm:mt-20">
+              <dl className="pl-band">
+                {BAND.map((item) => (
+                  <div key={item.label} className="flex flex-col">
+                    <dt className="pl-label order-2 mt-1.5">{item.label}</dt>
+                    <dd className="pl-band-value order-1">{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
           </div>
         </section>
 
@@ -150,8 +214,8 @@ export default async function LandingPage() {
         <section id="features" className="scroll-mt-16 border-b border-border">
           <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
             <Reveal>
-              <h2 className="max-w-2xl text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight font-medium tracking-tight">
-                Everything between a failed check and a user complaining.
+              <h2 className="pl-h2 max-w-2xl">
+                Everything between a failed check and a happy user.
               </h2>
             </Reveal>
 
@@ -165,7 +229,7 @@ export default async function LandingPage() {
                       {FEATURES[0].title}
                     </CardTitle>
                   </div>
-                  <CardDescription className="max-w-md leading-relaxed">
+                  <CardDescription className="pl-copy max-w-md leading-relaxed">
                     {FEATURES[0].body}
                   </CardDescription>
                 </CardHeader>
@@ -197,7 +261,7 @@ export default async function LandingPage() {
                           {feature.title}
                         </CardTitle>
                       </div>
-                      <CardDescription className="leading-relaxed">
+                      <CardDescription className="pl-copy leading-relaxed">
                         {feature.body}
                       </CardDescription>
                     </CardHeader>
@@ -221,13 +285,13 @@ export default async function LandingPage() {
                       {FEATURES[3].title}
                     </CardTitle>
                   </div>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  <p className="pl-copy mt-1.5 text-sm leading-relaxed text-muted-foreground">
                     {FEATURES[3].body}
                   </p>
                 </div>
                 {/* An illustrative miniature of /status/[monitorId] — not telemetry. */}
                 <figure className="w-full max-w-sm overflow-hidden rounded-lg border border-border bg-background shadow-xs ring-1 ring-foreground/10">
-                  <figcaption className="border-b border-border px-3 py-1.5 text-[0.625rem] tracking-[0.12em] text-muted-foreground uppercase">
+                  <figcaption className="border-b border-border px-3 py-1.5 text-[0.625rem] tracking-[0.06em] text-muted-foreground uppercase">
                     Public page, as your users see it
                   </figcaption>
                   <div className="flex items-center justify-between gap-3 px-3 py-2">
@@ -251,6 +315,43 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* -------------------------------------------------------- alerts --- */}
+        <section id="alerts" className="scroll-mt-16 border-b border-border">
+          <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+            <Reveal>
+              <h2 className="pl-h2 max-w-2xl">
+                Alerts land where you already work.
+              </h2>
+              <p className="pl-copy pl-lede mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+                Attach any mix of channels to a monitor. All of them are gated
+                on the same failure threshold, so the pager is quiet unless the
+                outage is real.
+              </p>
+            </Reveal>
+
+            {/* The connector picture: Sentinel at the hub, the four channels
+                wired to it. The ruled rows below carry the copy, so this
+                announces itself as a picture and the channel names stay in
+                the document. */}
+            <Reveal className="mt-12">
+              <ConnectorsDiagram />
+            </Reveal>
+
+            <Reveal className="mt-6">
+              <div className="pl-rows">
+                {CHANNELS.map((channel) => (
+                  <div key={channel.n}>
+                    <span className="pl-label pt-0.5">{channel.n}</span>
+                    <p className="pl-copy max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">
+                      {channel.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
         {/* --------------------------------------------------- how it works --- */}
         <section
           id="how-it-works"
@@ -258,29 +359,48 @@ export default async function LandingPage() {
         >
           <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
             <Reveal>
-              <h2 className="max-w-2xl text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight font-medium tracking-tight">
-                From signup to first alert.
-              </h2>
+              <h2 className="pl-h2 max-w-2xl">From signup to first alert.</h2>
             </Reveal>
 
-            <Reveal className="pl-stagger">
-              <ol className="mt-10 grid gap-6 sm:grid-cols-3">
+            <Reveal className="mt-10">
+              <ol className="pl-steps">
                 {STEPS.map((step) => (
-                  <li key={step.n}>
-                    <Card className="h-full gap-2">
-                      <CardHeader>
-                        <span className="pl-label">{step.n}</span>
-                        <CardTitle className="tracking-tight">
-                          {step.title}
-                        </CardTitle>
-                        <CardDescription className="leading-relaxed">
-                          {step.body}
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
+                  <li key={step.title}>
+                    <div className="pt-0.5">
+                      <h3 className="text-base font-medium tracking-tight">
+                        {step.title}
+                      </h3>
+                      <p className="pl-copy mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                        {step.body}
+                      </p>
+                    </div>
                   </li>
                 ))}
               </ol>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------- faq --- */}
+        <section id="faq" className="scroll-mt-16 border-b border-border">
+          <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+            <Reveal>
+              <h2 className="pl-h2 max-w-2xl">
+                Everything you might be wondering.
+              </h2>
+            </Reveal>
+
+            <Reveal className="mt-10">
+              <div className="pl-faq">
+                {FAQ.map((item) => (
+                  <details key={item.q} name="faq">
+                    <summary className="text-[0.9375rem]">{item.q}</summary>
+                    <p className="pl-copy text-sm sm:text-[0.9375rem]">
+                      {item.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
             </Reveal>
           </div>
         </section>
@@ -289,10 +409,10 @@ export default async function LandingPage() {
         <section className="border-b border-border">
           <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-32">
             <Reveal>
-              <h2 className="max-w-3xl text-[clamp(1.75rem,4.5vw,3rem)] leading-[1.1] font-medium tracking-tight">
+              <h2 className="pl-h1 max-w-3xl">
                 Know it is down before a user tells you.
               </h2>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
+              <p className="pl-copy pl-lede mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
                 Add your first monitor in about a minute. No card, no sales
                 call.
               </p>

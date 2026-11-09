@@ -1,10 +1,29 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const jetbrainsMono = JetBrains_Mono({
+/*
+ * Paper Mono (paper.design), variable wght 100-800, OFL. The app's mono face
+ * everywhere JetBrains Mono used to be — it maps to --font-app-mono, which
+ * globals.css assigns to both --font-sans and --font-mono.
+ */
+const paperMono = localFont({
+  src: "../fonts/PaperMono-Variable.woff2",
   variable: "--font-app-mono",
+  weight: "100 800",
+  display: "swap",
+});
+
+/*
+ * Geist Sans. The second voice: mono stays the identity for headings, labels,
+ * values and code, while running prose (paragraphs, descriptions, answers)
+ * reads in a sans. Consumed via --font-app-sans; the landing page scopes it
+ * to its prose blocks, the dashboard stays mono-first.
+ */
+const geistSans = Geist({
+  variable: "--font-app-sans",
   subsets: ["latin"],
 });
 
@@ -22,7 +41,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${jetbrainsMono.variable}`}
+      className={`${paperMono.variable} ${geistSans.variable}`}
     >
       <head>
         {/*

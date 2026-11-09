@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(git status; echo \"=== untracked all ===\"; git status --porcelain --untracked-files=all; echo \"=== dirs ===\"; ls src/components/figures src/components/iso 2>&1; ls src/fonts 2>&1)",
+      "Shell(cd /home/hyper/web/ump && D=\"${COMMANDCODE_SCRATCHPAD:-/tmp/cc-blobs}\"; rm -rf \"$D\"; mkdir -p \"$D\"; for b in $(git fsck 2>/dev/null | awk '$2==\"blob\"{print $3}'); do git cat-file -p \"$b\" > \"$D/$b\" 2>/dev/null; done; echo \"dumped $(ls \"$D\" | wc -l) blobs to $D\"; echo \"=== markers ===\"; grep -rl \"ConnectorsDiagram\" \"$D\" 2>/dev/null | sed \"s|$D/||\"; echo \"--uptime--\"; grep -rl \"UptimeChart\" \"$D\" 2>/dev/null | sed \"s|$D/||\"; echo \"--ofl--\"; grep -rl \"SIL OPEN FONT LICENSE\" \"$D\" 2>/dev/null | sed \"s|$D/||\"; echo \"--woff2--\"; for f in \"$D\"/*; do if [ \"$(head -c4 \"$f\" | od -An -tx1 | tr -d ' \\n')\" = \"774f4632\" ]; then echo \"$(basename $f) is woff2\"; fi; done)",
+      "Shell(cd /home/hyper/web/ump && set -e git cat-file -p 6e2d952d9487c142c13eaddf398c114f3ceb6e14 > src/app/page.tsx git cat-file -p d4a16fd0941fe50b8bb061e20e43d133f5a14139 > src/app/layout.tsx git cat-file -p 01891ac405738dbeca38ec8c8f23a8cc34f5fd8d > src/app/landing.css git cat-file -p 0d77fcd219b97c4aa84e9e3fa8848c579397a705 > src/components/prototype-landing/landing-nav.tsx git cat-file -p 69968a356d83667396f9fc8211960171bcf32f15 > src/components/prototype-landing/telemetry-panel.tsx git cat-file -p f4e518501616042e3f21f67bff971c0e9c4c8bd8 > src/lib/prototype-landing-telemetry.ts git cat-file -p edd1a20ad5a3db3ba25ac011f19679c33a2c96a9 > tsconfig.json git cat-file -p 8c33bcec68d8ae4529dc28971eeff0743c533782 > src/components/prototype-landing/uptime-chart.tsx git cat-file -p b39a7cece0fc767b24d1d81fc15b72d41e383ad4 > src/components/prototype-landing/connectors-diagram.tsx mkdir -p src/fonts git cat-file -p 00aff8566da2ebef9cc33e804f42a54e947763e9 > src/fonts/PaperMono-OFL.txt git cat-file -p 4e45300e2b5408476db0f9955ba981447ef6f6bd > src/fonts/PaperMono-Variable.woff2 echo \"restored\"; file src/fonts/PaperMono-Variable.woff2; head -c 4 src/fonts/PaperMono-Variable.woff2; echo)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

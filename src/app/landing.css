@@ -1,20 +1,19 @@
 /*
- * Landing page — register: Instrument.
+ * Landing page — register: Technical (all-mono, sans prose).
  *
- * Scoped to this route. Nothing here changes the dashboard or any other page.
+ * Scoped to this route. Nothing here changes the dashboard's styles.
  *
- * The page sits inside the app's token layer: it uses the same radius, the same
- * Card surfaces and the same type scale as the rest of Sentinel. What it adds
- * on top is the instrument character — uppercase micro-labels, tabular
- * numerals, and a ruled tick scale — so the page reads as a readout rather
- * than a marketing banner while still being visibly the same product.
+ * The page sits inside the app's token layer: it uses the same radius, the
+ * same Card surfaces, the same colours and the same spacing as the rest of
+ * Sentinel. The app now speaks Paper Mono (paper.design, OFL, variable
+ * 100-800) everywhere — headings, labels, values, buttons, code. What this
+ * page adds is the second voice the Technical register requires: Geist Sans,
+ * scoped via .pl-copy to running prose only, because mono at paragraph
+ * length is unreadable.
  *
  * Deliberately NOT redefined here, because the app already owns them:
  *   - radius. --radius is 0.75rem and every surface uses it.
  *   - shadows. Cards carry the shared shadow-xs + ring-1 treatment.
- *   - the typeface. --font-sans maps to the app's JetBrains Mono; adding a
- *     second face on one route would make this page argue with the dashboard,
- *     so the copy is kept terse instead.
  */
 
 /* ---------------------------------------------------------------- labels --- */
@@ -22,9 +21,202 @@
 .pl-label {
   font-size: 0.6875rem;
   line-height: 1;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted-foreground);
+}
+
+/* ------------------------------------------------------------------ type --- */
+
+/*
+ * One identity, two voices. Paper Mono is the page's voice — display, labels,
+ * readouts, buttons. .pl-copy hands the running prose to Geist Sans: titles
+ * and numbers stay mono, the sentences between them get a face built for
+ * reading. A 0.01em loosening restores sans legibility at small sizes.
+ */
+.pl-copy {
+  font-family: var(--font-app-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+/*
+ * Hairline keeps its display under ~34px. Mono at display sizes goes ragged
+ * fast, so the cap matters more here than in a sans — the headline earns its
+ * presence from weight and tracking, not from height.
+ */
+.pl-h1 {
+  font-size: clamp(1.625rem, 1.1rem + 2.2vw, 2.375rem);
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.pl-h2 {
+  font-size: clamp(1.25rem, 1rem + 1.1vw, 1.625rem);
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.pl-lede {
+  max-width: 60ch;
+  text-wrap: pretty;
+}
+
+/* --------------------------------------------------------- numbers band --- */
+
+/*
+ * A ruled strip of readouts under the hero — hairline's data band. Hairline
+ * dividers, not boxes: the verticals are 1px rules and the whole thing sits
+ * between the section rules.
+ */
+.pl-band {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .pl-band {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.pl-band > div {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .pl-band > div {
+    border-bottom: 0;
+  }
+
+  .pl-band > div + div {
+    border-left: 1px solid var(--border);
+  }
+}
+
+/* Mobile verticals come from the two-column wrap: */
+@media (max-width: 639.98px) {
+  .pl-band > div:nth-child(even) {
+    border-left: 1px solid var(--border);
+  }
+}
+
+.pl-band-value {
+  font-size: 1.375rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------- numbered rows --- */
+
+/*
+ * hairline's .howto: a decimal-leading-zero counter in the left column, the
+ * copy in the right, rules between rows. Replaces the step cards.
+ */
+.pl-steps {
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+
+.pl-steps > li {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border);
+  counter-increment: pl-step;
+}
+
+.pl-steps > li::before {
+  content: counter(pl-step, decimal-leading-zero);
+  font-size: 0.6875rem;
+  line-height: 1.75;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.pl-steps {
+  counter-reset: pl-step;
+}
+
+/* ------------------------------------------------------------------ faq --- */
+
+.pl-faq {
+  border-top: 1px solid var(--border);
+}
+
+.pl-faq > details {
+  border-bottom: 1px solid var(--border);
+}
+
+.pl-faq summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.125rem 0;
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  list-style: none;
+}
+
+.pl-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The marker is typographic, not an icon: a plus that settles into a minus. */
+.pl-faq summary::after {
+  content: "+";
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.pl-faq details[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.pl-faq details > p {
+  max-width: 60ch;
+  padding-bottom: 1.25rem;
+  color: var(--muted-foreground);
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------- channel table --- */
+
+/*
+ * The alert channels, as a ruled table — one row per channel, same register
+ * as the spec list in features.
+ */
+.pl-rows {
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+
+.pl-rows > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .pl-rows > div {
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 0 2rem;
+    align-items: baseline;
+  }
 }
 
 .pl-value {
@@ -37,6 +229,19 @@
 
 /* A readout with nothing behind it. Never a placeholder zero. */
 .pl-value[data-empty="true"] {
+  color: var(--muted-foreground);
+}
+
+/* The same readout, one size down — for long values like the HH:MM:SS clock. */
+.pl-value-sm {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+
+.pl-value-sm[data-empty="true"] {
   color: var(--muted-foreground);
 }
 
@@ -200,6 +405,10 @@
   .pl-rule-link,
   .pl-press {
     transition-duration: 0ms;
+  }
+
+  .pl-faq summary::after {
+    transition: none;
   }
 }
 

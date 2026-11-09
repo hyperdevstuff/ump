@@ -1,4 +1,5 @@
 import { ElapsedSince } from "@/components/prototype-landing/elapsed-since";
+import { UptimeChart } from "@/components/prototype-landing/uptime-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SentinelTelemetry } from "@/lib/prototype-landing-telemetry";
 
@@ -10,21 +11,36 @@ function formatClock(date: Date) {
   });
 }
 
+/** Compact elapsed readout for the Last-incident tile: minutes, hours, days. */
+function elapsedShort(date: Date) {
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+  if (minutes < 60) return { value: String(Math.max(minutes, 1)), unit: "m" };
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return { value: String(hours), unit: "h" };
+  return { value: String(Math.floor(hours / 24)), unit: "d" };
+}
+
 function Readout({
   label,
   value,
   unit,
   empty = false,
+  // Long values (the HH:MM:SS clock) drop a size instead of crowding the tile.
+  dense = false,
 }: {
   label: string;
   value: string;
   unit?: string;
   empty?: boolean;
+  dense?: boolean;
 }) {
   return (
     <div className="rounded-lg border border-border bg-background px-3 py-2.5">
       <div className="pl-label">{label}</div>
-      <div className="pl-value mt-1.5" data-empty={empty ? "true" : "false"}>
+      <div
+        className={`mt-1.5 ${dense ? "pl-value-sm" : "pl-value"}`}
+        data-empty={empty ? "true" : "false"}
+      >
         {value}
         {unit && !empty && (
           <span className="ml-1 text-xs font-normal text-muted-foreground">
@@ -54,8 +70,9 @@ export function TelemetryPanel({
 }) {
   return (
     <Card size="sm">
-      {/* Header strip */}
-      <CardHeader className="flex-row items-center justify-between gap-3 border-b border-border">
+      {/* Header strip. CardHeader is a single-column grid; the explicit
+          two-column template is what puts the window label on the right. */}
+      <CardHeader className="grid-cols-[1fr_auto] items-center gap-3 border-b border-border">
         <CardTitle className="flex items-center gap-2">
           <span
             className="pl-dot"
@@ -70,7 +87,8 @@ export function TelemetryPanel({
       <CardContent className="px-0">
         {telemetry ? (
           <>
-            <div className="grid grid-cols-2 gap-3 p-4">
+            {/* Four-wide once the card has the room for it. */}
+            <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
               <Readout
                 label="Checks"
                 value={telemetry.checks24h.toLocaleString("en-GB")}
@@ -105,7 +123,26 @@ export function TelemetryPanel({
                 value={telemetry.incidents7d.toLocaleString("en-GB")}
               />
               <Readout
+                label="Active"
+                value={telemetry.activeMonitors.toLocaleString("en-GB")}
+              />
+              <Readout
+                label="Last incident"
+                value={
+                  telemetry.lastIncidentAt
+                    ? elapsedShort(telemetry.lastIncidentAt).value
+                    : "—"
+                }
+                unit={
+                  telemetry.lastIncidentAt
+                    ? elapsedShort(telemetry.lastIncidentAt).unit
+                    : undefined
+                }
+                empty={!telemetry.lastIncidentAt}
+              />
+              <Readout
                 label="Since check"
+                dense
                 value={
                   telemetry.lastCheckedAt
                     ? formatClock(telemetry.lastCheckedAt)
@@ -113,6 +150,11 @@ export function TelemetryPanel({
                 }
                 empty={!telemetry.lastCheckedAt}
               />
+            </div>
+
+            {/* The block line: the hero's one chart, drawn from real checks. */}
+            <div className="border-t border-border pt-4">
+              <UptimeChart hourly={telemetry.hourly} />
             </div>
 
             {/* Live foot: the one thing on the page that moves on its own. */}
